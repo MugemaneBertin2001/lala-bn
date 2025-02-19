@@ -1,6 +1,5 @@
 package lala.house.lala.dto;
-
-import lala.house.lala.enums.UserRole;
+import lala.house.lala.entities.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -9,5 +8,9 @@ import lombok.Data;
 public class AuthResponse {
     private String token;
     private String message;
-    
+    private User user; 
+    private boolean isNewUser; 
+
 }
+
+

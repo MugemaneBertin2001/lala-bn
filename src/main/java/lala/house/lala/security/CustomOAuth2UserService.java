@@ -77,7 +77,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         return new DefaultOAuth2User(
                 authorities,
                 oauth2User.getAttributes(),
-                "sub" // Use "sub" as the primary key in the OAuth2 attributes
+                "sub" 
         );
     }
 }

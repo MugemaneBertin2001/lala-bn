@@ -7,6 +7,7 @@ import lala.house.lala.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import lala.house.lala.dto.AuthResponse;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -46,19 +47,59 @@ public class AuthService {
         String pictureUrl = oauth2User.getAttribute("picture");
         String googleId = oauth2User.getAttribute("sub");
 
-        // Find or create user
-        User user = userRepository.findByEmail(email)
-                .orElseGet(() -> {
-                    User newUser = new User();
-                    newUser.setEmail(email);
-                    newUser.setFirstName(firstName);
-                    newUser.setLastName(lastName);
-                    newUser.setGoogleId(googleId);
-                    newUser.setPictureUrl(pictureUrl);
-                    newUser.setRole(UserRole.RENTER);
-                    return userRepository.save(newUser);
-                });
+        // Check if user exists
+        Optional<User> existingUser = userRepository.findByEmail(email);
 
-        return new AuthResponse(jwtService.generateToken(user), "Login successful");
+        if (existingUser.isPresent()) {
+            // Existing user - generate token and return normal response
+            User user = existingUser.get();
+            // Update user info if needed
+            user.setFirstName(firstName);
+            user.setLastName(lastName);
+            user.setPictureUrl(pictureUrl);
+            User savedUser = userRepository.save(user);
+
+            return new AuthResponse(
+                    jwtService.generateToken(savedUser),
+                    "Login successful",
+                    savedUser,
+                    false 
+            );
+        } else {
+            // New user - return user info without token
+            User newUser = new User();
+            newUser.setEmail(email);
+            newUser.setFirstName(firstName);
+            newUser.setLastName(lastName);
+            newUser.setPictureUrl(pictureUrl);
+            newUser.setGoogleId(googleId);
+            newUser.setRole(null); 
+            User savedUser = userRepository.save(newUser);
+            return new AuthResponse(
+                    null, // No token yet
+                    "Please complete registration",
+                    savedUser,
+                    true 
+            );
+        }
+    }
+
+    // Add a new method to update user role based on email
+    public AuthResponse completeRegistration(String email, UserRole role) {
+        Optional<User> existingUser = userRepository.findByEmail(email);
+        if (!existingUser.isPresent()) {
+            throw new RuntimeException("User not found");
+        }
+
+        User user = existingUser.get();
+        user.setRole(role);
+
+        User savedUser = userRepository.save(user);
+
+        return new AuthResponse(
+                jwtService.generateToken(savedUser),
+                "Registration completed successfully",
+                savedUser,
+                false);
     }
 }

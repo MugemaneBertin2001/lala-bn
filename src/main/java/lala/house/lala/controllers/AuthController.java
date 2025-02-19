@@ -60,6 +60,17 @@ public class AuthController {
         }
     }
 
+    @PutMapping("/complete-registration")
+    public ResponseEntity<AuthResponse> completeRegistration(@RequestParam String email, @RequestParam UserRole role) {
+        try {
+            AuthResponse response = authService.completeRegistration(email, role);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error completing registration", e);
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
     @PutMapping("/role")
     public ResponseEntity<User> updateUserRole(@AuthenticationPrincipal OAuth2User principal,
             @RequestParam UserRole role) {
