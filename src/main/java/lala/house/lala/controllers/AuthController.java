@@ -1,5 +1,6 @@
 package lala.house.lala.controllers;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -16,11 +17,15 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 import lala.house.lala.dto.AuthResponse;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -29,7 +34,13 @@ public class AuthController {
     private final AuthService authService;
     private final Logger log = LoggerFactory.getLogger(AuthController.class);
 
-    public AuthController(AuthService authService) {
+    private final ObjectMapper objectMapper;
+
+    @Value("${frontend.url}")
+    private String frontendUrl;
+
+    public AuthController(AuthService authService, ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
         this.authService = authService;
     }
 
@@ -50,13 +61,28 @@ public class AuthController {
     }
 
     @GetMapping("/success")
-    public ResponseEntity<AuthResponse> handleLoginSuccess(@AuthenticationPrincipal OAuth2User principal) {
+    public ResponseEntity<Void> handleLoginSuccess(@AuthenticationPrincipal OAuth2User principal) {
         try {
             AuthResponse response = authService.handleGoogleLogin(principal);
-            return ResponseEntity.ok(response);
+
+            String jsonResponse = objectMapper.writeValueAsString(response);
+            String encodedData = URLEncoder.encode(jsonResponse, StandardCharsets.UTF_8);
+
+            // Redirect to frontend with success data
+            String redirectUrl = frontendUrl + "/auth?data=" + encodedData;
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .location(URI.create(redirectUrl))
+                    .build();
         } catch (Exception e) {
             log.error("Error handling Google login success", e);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+            // Encode error message
+            String errorMessage = URLEncoder.encode("Login failed. Please try again.", StandardCharsets.UTF_8);
+            String redirectUrl = frontendUrl + "/auth?error=" + errorMessage;
+
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .location(URI.create(redirectUrl))
+                    .build();
         }
     }
 
