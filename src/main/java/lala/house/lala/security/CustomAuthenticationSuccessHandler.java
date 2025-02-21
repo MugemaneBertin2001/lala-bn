@@ -12,7 +12,6 @@ import lala.house.lala.entities.User;
 import lala.house.lala.enums.UserRole;
 import lala.house.lala.repository.UserRepository;
 
-
 @Component
 public class CustomAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
@@ -41,9 +40,8 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
                     newUser.setLastName(lastName);
                     newUser.setGoogleId(googleId);
                     newUser.setPictureUrl(pictureUrl);
-                    newUser.setRole(UserRole.RENTER); 
                     return userRepository.save(newUser);
                 });
-        response.sendRedirect("/api/auth/success"); 
+        response.sendRedirect("/api/auth/success");
     }
 }
