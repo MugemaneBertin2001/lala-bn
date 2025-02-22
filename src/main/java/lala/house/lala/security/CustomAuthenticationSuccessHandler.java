@@ -40,6 +40,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
                     newUser.setLastName(lastName);
                     newUser.setGoogleId(googleId);
                     newUser.setPictureUrl(pictureUrl);
+                    newUser.setRole(UserRole.RENTER); // Default role
                     return userRepository.save(newUser);
                 });
         response.sendRedirect("/api/auth/success");

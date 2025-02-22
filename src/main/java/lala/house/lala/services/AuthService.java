@@ -62,9 +62,7 @@ public class AuthService {
             return new AuthResponse(
                     jwtService.generateToken(savedUser),
                     "Login successful",
-                    savedUser,
-                    false 
-            );
+                    savedUser);
         } else {
             // New user - return user info without token
             User newUser = new User();
@@ -73,14 +71,12 @@ public class AuthService {
             newUser.setLastName(lastName);
             newUser.setPictureUrl(pictureUrl);
             newUser.setGoogleId(googleId);
-            newUser.setRole(null); 
+            newUser.setRole(UserRole.RENTER);
             User savedUser = userRepository.save(newUser);
             return new AuthResponse(
-                    null, // No token yet
+                    null, 
                     "Please complete registration",
-                    savedUser,
-                    true 
-            );
+                    savedUser);
         }
     }
 
@@ -93,13 +89,13 @@ public class AuthService {
 
         User user = existingUser.get();
         user.setRole(role);
+        user.setIsNewUser(false);
 
         User savedUser = userRepository.save(user);
 
         return new AuthResponse(
                 jwtService.generateToken(savedUser),
                 "Registration completed successfully",
-                savedUser,
-                false);
+                savedUser);
     }
 }

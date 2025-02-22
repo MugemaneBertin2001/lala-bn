@@ -36,6 +36,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
+    @Column(nullable = true)
+    private Boolean isNewUser = true;
+
     private String googleId;
 
     private String pictureUrl;

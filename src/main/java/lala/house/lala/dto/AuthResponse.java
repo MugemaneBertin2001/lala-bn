@@ -9,7 +9,6 @@ public class AuthResponse {
     private String token;
     private String message;
     private User user; 
-    private boolean isNewUser; 
 
 }
 

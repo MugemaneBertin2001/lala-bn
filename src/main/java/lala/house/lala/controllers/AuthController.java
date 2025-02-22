@@ -7,6 +7,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import lala.house.lala.services.AuthService;
 import lala.house.lala.entities.User;
@@ -22,6 +23,8 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 import lala.house.lala.dto.AuthResponse;
+import lala.house.lala.dto.CompleteRegistrationRequest;
+
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -87,9 +90,9 @@ public class AuthController {
     }
 
     @PutMapping("/complete-registration")
-    public ResponseEntity<AuthResponse> completeRegistration(@RequestParam String email, @RequestParam UserRole role) {
+    public ResponseEntity<AuthResponse> completeRegistration(@RequestBody CompleteRegistrationRequest request) {
         try {
-            AuthResponse response = authService.completeRegistration(email, role);
+            AuthResponse response = authService.completeRegistration(request.getEmail(), request.getRole());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error completing registration", e);
