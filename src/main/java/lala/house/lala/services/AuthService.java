@@ -98,4 +98,8 @@ public class AuthService {
                 "Registration completed successfully",
                 savedUser);
     }
+
+    public Optional<User> getUserById(Long hostId) {
+        return userRepository.findById(hostId);
+    }
 }
